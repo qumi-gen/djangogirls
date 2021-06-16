@@ -13,9 +13,9 @@ def post_detail(request, pk):
     post = get_object_or_404(Post, pk=pk)
     return render(request, 'blog/post_detail.html', {'post': post})
 
-def post_new(request):
-    form = PostForm()
-    return render(request, 'blog/post_edit.html', {'form': form})
+# def post_new(request):
+#     form = PostForm()
+#     return render(request, 'blog/post_edit.html', {'form': form})
 
 def post_new(request):
     if request.method == "POST":
@@ -30,6 +30,19 @@ def post_new(request):
         form = PostForm()
     return render(request, 'blog/post_edit.html', {'form': form})
 
+def post_edit(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    if request.method == "POST":
+        form = PostForm(request.POST, instance=post)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.published_date = timezone.now()
+            post.save()
+            return redirect('post_detail', pk=post.pk)
+    else:
+        form = PostForm(instance=post)
+    return render(request, 'blog/post_edit.html', {'form': form})
 """
 post_list という関数（def から始まる部分のことです）を作りました。これは request を引数に取ります。
 blog/post_list.html テンプレートを（色々なものを合わせて）組み立てる render という関数を呼び出して得た値を return しています。
